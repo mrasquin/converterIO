@@ -1,0 +1,10 @@
+.svn/
+lib/
+obj/
+*.[o]
+*~
+phastaIO.cc
+phastaIO.h
+rdtsc.h
+converterO2N
+converterN2O
