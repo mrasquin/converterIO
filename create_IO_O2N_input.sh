@@ -24,15 +24,32 @@ echo "Number of parts: $N_parts"
 echo "Number of SyncIO files: $N_files"
 echo ""
 
-#First, count the interior and boundary topology blocks
 dir=$N_parts-procs_case
+
+#Do a couple of sanity check on the input parameters of the script
+if [ ! -d $dir ]; then
+	die "$N_parts-procs_case does not exist\n Aborting"		
+fi
+
+if [ ! -e $dir/restart.$N_steps.1 ]; then
+        die "Time step $N_steps does not exist in $N_parts-procs_case\n Aborting"
+fi
+
+resmodulo=$(($N_parts % $N_files))
+if [ "$resmodulo" -ne "0" ]; then
+        die "The number of SyncIO files requested $N_files is not a multiple of the number of parts $N_parts\n Aborting"
+fi
+
+
+
+
+#First, count the interior and boundary topology blocks
 grep -a ' : < ' $dir/geombc.dat.* | grep 'connectivity interior' | awk -F : '{print $1,$2}' | awk '{$1=""; print $0}' | sort | uniq -c  > list_tpblocks.dat
 interior_tpblocks=`cat list_tpblocks.dat | wc -l`
 echo "There are $interior_tpblocks different interior tp blocks in all the geombc files:"
 cat list_tpblocks.dat
 rm list_tpblocks.dat
 echo ""
-interior_tpblocks=3
 
 grep -a ' : < ' $dir/geombc.dat.* | grep 'connectivity boundary' | awk -F : '{print $1,$2}' | awk '{$1=""; print $0}' | sort | uniq -c  > list_tpblocks.dat
 boundary_tpblocks=`cat list_tpblocks.dat | wc -l`
@@ -40,7 +57,6 @@ echo "There are $boundary_tpblocks different boundary tp blocks in all the geomb
 cat list_tpblocks.dat
 rm list_tpblocks.dat
 echo ""
-boundary_tpblocks=5
 
 #Now, create the IO.O2N.input file required by the converter
 file=IO.O2N.input
