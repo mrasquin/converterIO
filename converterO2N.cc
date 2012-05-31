@@ -484,7 +484,7 @@ int main(int argc, char *argv[]) {
 	      bzero((void*)fieldtag,255);
 
 	      fieldCompareMark=0;
-/*	      if (cscompare("nbc values",fieldNameD[j]))
+	      if (cscompare("nbc values",fieldNameD[j]))
 		{
 		  fieldCompareMark = 1;
 		  valuesMark[i]++;
@@ -494,7 +494,7 @@ int main(int argc, char *argv[]) {
 		  if ( valuesMark[i]>numBoundaryFields[i] )
 		   for ( k = 0; k < expectD[j]; k++ )
 		      paraD[i][j][k] = 0;
-		}*/
+		}
 
 	      sprintf(fieldtag,"%s@%d",fieldNameD[j],GPID);
 
@@ -558,7 +558,7 @@ int main(int argc, char *argv[]) {
 	      GPID = startpart + i;
 	      bzero((void*)fieldtag,255);
 
-/*	      if (cscompare("connectivity interior",fieldNameI[j]))
+	      if (cscompare("connectivity interior",fieldNameI[j]))
 		{
 		  interiorMark[i]++;
 		  bzero((void*)fieldNameI[j],128);
@@ -568,9 +568,9 @@ int main(int argc, char *argv[]) {
 		    for ( k = 0; k < expectI[j]; k++ )
 		      paraI[i][j][k] = 0;
 
-		}*/
+		}
 
-/*	      if (cscompare("connectivity boundary",fieldNameI[j]))
+	      if (cscompare("connectivity boundary",fieldNameI[j]))
 		{
 		  boundaryMark[i]++;
 		  bzero((void*)fieldNameI[j],128);
@@ -579,10 +579,10 @@ int main(int argc, char *argv[]) {
 		  if ( boundaryMark[i]>numBoundaryFields[i] )
 		    for ( k = 0; k < expectI[j]; k++ )
 		      paraI[i][j][k] = 0;
-		}*/
+		}
 
 	      fieldCompareMark=0;
-/*	      if (cscompare("nbc codes",fieldNameI[j]))
+	      if (cscompare("nbc codes",fieldNameI[j]))
 		{
 		  fieldCompareMark=1;
 		  codesMark[i]++;
@@ -592,7 +592,7 @@ int main(int argc, char *argv[]) {
 		  if ( codesMark[i]>numBoundaryFields[i] )
 		    for ( k = 0; k < expectI[j]; k++ )
 		      paraI[i][j][k] = 0;
-		}*/
+		}
 
 	      sprintf(fieldtag,"%s@%d",fieldNameI[j],GPID);
 
