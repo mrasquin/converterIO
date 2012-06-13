@@ -3,6 +3,7 @@ lib/
 obj/
 *.[o]
 *~
+*.swp
 phastaIO.cc
 phastaIO.h
 rdtsc.h
