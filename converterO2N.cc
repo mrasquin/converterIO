@@ -11,32 +11,6 @@
 #include <sys/types.h>
 //MR CHANGE END
 
-/*inline int 
-computenitems(const int localpartid, const int fieldid, const int myrank, const char fieldName[], int ***para, const int expectD, const int numVariables) {
-// This routine computes the number of items in the data block based on 
-// - the name of the fields 
-// - the integers read from the header
-
-  int nItems;
-//  printf("irank: %d fieldname: %s ParaD: %d numVariables: %d\n",myrank,fieldName, paraD[0][0][0], numVariables);
-
-  //if (cscompare("double",S3)) 
-
-  if ( expectD==1)
-    nItems = para[localpartid][fieldid][0];
-  else
-    nItems = para[localpartid][fieldid][0] * para[localpartid][fieldid][1];
-
-  if (cscompare("nbc values",fieldName[fieldid]))
-    nItems = para[localpartid][fieldid][0] * (numVariables+1);
-
-  
-
-//  nItems=para[0][0][0]; 
-  return nItems;
-
-}*/
-
 inline int
 cscompare( const char teststring[],
 	   const char targetstring[] )
