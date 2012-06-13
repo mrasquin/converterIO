@@ -11,6 +11,32 @@
 #include <sys/types.h>
 //MR CHANGE END
 
+/*inline int 
+computenitems(const int localpartid, const int fieldid, const int myrank, const char fieldName[], int ***para, const int expectD, const int numVariables) {
+// This routine computes the number of items in the data block based on 
+// - the name of the fields 
+// - the integers read from the header
+
+  int nItems;
+//  printf("irank: %d fieldname: %s ParaD: %d numVariables: %d\n",myrank,fieldName, paraD[0][0][0], numVariables);
+
+  //if (cscompare("double",S3)) 
+
+  if ( expectD==1)
+    nItems = para[localpartid][fieldid][0];
+  else
+    nItems = para[localpartid][fieldid][0] * para[localpartid][fieldid][1];
+
+  if (cscompare("nbc values",fieldName[fieldid]))
+    nItems = para[localpartid][fieldid][0] * (numVariables+1);
+
+  
+
+//  nItems=para[0][0][0]; 
+  return nItems;
+
+}*/
+
 inline int
 cscompare( const char teststring[],
 	   const char targetstring[] )
@@ -32,6 +58,28 @@ cscompare( const char teststring[],
   if ( !( *s1 ) || ( *s1 == '?') ) return 1;
   else return 0;
 }
+
+inline int 
+computenitems(const int localpartid, const int fieldid, const int myrank, const char *fieldName, int ***para, const int intHeader, const int numVariables) {
+// This routine computes the number of items in the data block based on 
+// - the name of the fields 
+// - the integers read from the header
+
+  int nItems;
+  //printf("irank: %d fieldname: %s ParaD: %d numVariables: %d\n",myrank,fieldName, para[0][0][0], numVariables);
+
+
+  if (cscompare("nbc values",fieldName))
+    nItems = para[localpartid][fieldid][0] * (numVariables+1);
+  else if  (cscompare("nbc codes",fieldName))
+    nItems = para[localpartid][fieldid][0] * 2;
+  else if ( intHeader==1)
+    nItems = para[localpartid][fieldid][0];
+  else
+    nItems = para[localpartid][fieldid][0] * para[localpartid][fieldid][1];
+  return nItems;
+}
+
 
 int main(int argc, char *argv[]) {
 
@@ -109,8 +157,9 @@ int main(int argc, char *argv[]) {
   int iarray[10], igeom, isize,TempFileHandle;
 
   ////////////////////////////////////////
-  // Test if the user has given the right
-  // parameters
+  // Test if the user has given the right  parameters related to the number of parts, procs and SyncIO files
+  ////////////////////////////////////////
+
   if (N_parts%N_files!=0)
     {
       printf("Input error: number of parts should be a multiple of number of files!\n");
@@ -132,6 +181,8 @@ int main(int argc, char *argv[]) {
 
   /////////////////////////////////////
   // Create numpe.in and numstart.dat
+  ////////////////////////////////////////
+
   if (myrank==0)
     {
 
@@ -164,8 +215,7 @@ int main(int argc, char *argv[]) {
 
   int interiorMark[nppp], boundaryMark[nppp], codesMark[nppp], valuesMark[nppp];
   int numVariables[nppp];
-  int numBoundaryFields[nppp], numInteriorFields[nppp];
-
+//  int numBoundaryFields[nppp], numInteriorFields[nppp];
 
   if(myrank==0){
     printf("Starting to read some headers in the restart.##.## and geombc.dat.## files\n");
@@ -175,21 +225,22 @@ int main(int argc, char *argv[]) {
     {
       int ione = 1;
       sprintf(gfname,"./%d-procs_case/restart.%d.%d",N_parts,N_steps,startpart+j);
-			printf("before openfile(), myrank = %d \n", myrank);
+//			printf("before openfile(), myrank = %d \n", myrank);
       openfile_(gfname,"read",&TempFileHandle);
-			printf("2 openfile(), myrank = %d \n", myrank);
-			printf("1 readheader(), myrank = %d \n", myrank);
+//			printf("2 openfile(), myrank = %d \n", myrank);
+//			printf("1 readheader(), myrank = %d \n", myrank);
       readheader_( &TempFileHandle,
 		   "number of variables",
 		   (void*)iarray,
 		   &ione,
 		   "integer",
 		   "binary" );
-			printf("2 readheader(), myrank = %d \n", myrank);
+//			printf("2 readheader(), myrank = %d \n", myrank);
       closefile_(&TempFileHandle, "read");
       numVariables[j] = iarray[0];
 
-      bzero((void*)gfname,64);
+//    It should be useless to read these information!!!! Fix this
+/*      bzero((void*)gfname,64);
       sprintf(gfname,"./%d-procs_case/geombc.dat.%d",N_parts,startpart+j);
       openfile_(gfname,"read",&TempFileHandle);
       readheader_( &TempFileHandle,
@@ -198,9 +249,11 @@ int main(int argc, char *argv[]) {
 		   &ione,
 		   "integer",
 		   "binary" );
-      numInteriorFields[j] = iarray[0];
-      //printf("file %d number of interior[%d] is %d\n",startpart+j,j,numInteriorFields[j]);
+      numInteriorFields[j] = iarray[0]; // This only give the local number of blocks, not the total in the whole domain
+     // printf("file %d number of interior[%d] is %d\n",startpart+j,j,numInteriorFields[j]);
+*/
 
+/*
       readheader_( &TempFileHandle,
 		   "number of boundary tpblocks",
 		   (void*)iarray,
@@ -210,30 +263,48 @@ int main(int argc, char *argv[]) {
       closefile_(&TempFileHandle, "read");
       numBoundaryFields[j] = iarray[0];
       //printf("file %d number of boundary[%d] is %d\n",startpart+j,j,numBoundaryFields[j]);
-
+*/
       //      numInteriorFields[j] = 0;
       //      numBoundaryFields[j] = 0;
 
-      MPI_Barrier(MPI_COMM_WORLD);
+      
+//      printf("loop %d ,rank %d is waiting, nppp is %d\n",j,myrank,nppp);
+//      int ierr;
+//      ierr = MPI_Barrier(MPI_COMM_WORLD); // already there
+//        MPI_Barrier(MPI_COMM_WORLD); // already there
+//      fflush(stdout);
+//      if (myrank==0)  usleep(100);
+//      printf("loop %d ,rank %d is released, nppp is %d, ierr is %d\n",j,myrank,nppp, ierr);
+//      fflush(stdout);
+
     }
+
+//    printf("rank %d is waiting\n",myrank);
+//    fflush(stdout);
+    MPI_Barrier(MPI_COMM_WORLD); //added by MR
+
+
+//  for (  j = 0; j < nppp; j++  ) {
+//    printf("part, rank, number of variables, interior tpblocks, boundary tpblocks: %d %d %d %d %d\n",startpart+j,myrank,numVariables[j],numInteriorFields[j],numBoundaryFields[j]);
+//    }
 
   /////////////////////////
   for ( i = 0; i < nppp; i++ )
     {
-      Dfield[i] = new double*[N_geombc_double];
-      paraD[i] = new int*[N_geombc_double];
-      Ifield[i] = new int*[N_geombc_integer];
-      paraI[i] = new int*[N_geombc_integer];
+      Dfield[i] = new double*[N_geombc_double]; // Space for the datablock of double format 
+      paraD[i] = new int*[N_geombc_double];     // Integers in the header of each field of double format
+      Ifield[i] = new int*[N_geombc_integer];   // Space for the datablock of integer format
+      paraI[i] = new int*[N_geombc_integer];    // Integers in the header of each field of integer format
 
     }
 
-  expectD = new int[N_geombc_double];
-  expectI = new int[N_geombc_integer];
+  expectD = new int[N_geombc_double];          // Expected number of integers in the header for each field of double format
+  expectI = new int[N_geombc_integer];         // Expected number of integers in the header for each field of integer format
 
-  fieldNameD = new char*[N_geombc_double];
-  fileTypeD = new char*[N_geombc_double];
-  dataTypeD = new char*[N_geombc_double];
-  headerTypeD = new char*[N_geombc_double];
+  fieldNameD = new char*[N_geombc_double];     // Name of the field in double format
+  fileTypeD = new char*[N_geombc_double];      // geombc or restart (useless if associated with geombc file but read)
+  dataTypeD = new char*[N_geombc_double];      // Integer or double (useless if associated with double data but read)
+  headerTypeD = new char*[N_geombc_double];    // block (means with data block) or header (just a header with no block)
 
   fieldNameI = new char*[N_geombc_integer];
   fileTypeI = new char*[N_geombc_integer];
@@ -254,7 +325,7 @@ int main(int argc, char *argv[]) {
 
   for ( i = 0; i < N_geombc_integer; i++ )
     {
-      WriteLockI[i]=0;
+      WriteLockI[i]=0; //This take value 1 if the field requested in IO.input is not found (typically for tpblocks)
 
       fieldNameI[i] = new char[128];
       fileTypeI[i] = new char[128];
@@ -263,6 +334,7 @@ int main(int argc, char *argv[]) {
     }
 
   ////////////////////////////////////////////////////////////////
+  // Reading IO.input        
   // temporary fix: in the new version the double and integer
   //                can mix and match to avoid the order confusion
   ////////////////////////////////////////////////////////////////
@@ -285,7 +357,8 @@ int main(int argc, char *argv[]) {
       token = strtok ( NULL, "," );
       strcpy( S5, token );
 
-      if (cscompare(S3,"double"))
+      //if (cscompare(S3,"double"))
+      if (cscompare("double",S3))
 	{
 	  strcpy( fileTypeD[double_counter], S1 );
 	  strcpy( fieldNameD[double_counter], S2 );
@@ -296,7 +369,8 @@ int main(int argc, char *argv[]) {
 	  double_counter++;
 	}
 
-      if (cscompare(S3,"integer"))
+      //if (cscompare(S3,"integer"))
+      if (cscompare("integer",S3))
 	{
 	  strcpy( fileTypeI[int_counter], S1 );
 	  strcpy( fieldNameI[int_counter], S2 );
@@ -310,7 +384,14 @@ int main(int argc, char *argv[]) {
 
   //////////////////////////////////////////////////////////////
 
-  MPI_Barrier(MPI_COMM_WORLD);
+  //for ( i = 0; i < N_geombc_double; i++) {
+    //printf("%d %s %s %s %s %d\n", myrank, fileTypeD[i], fieldNameD[i], dataTypeD[i], headerTypeD[i], expectD[i]);
+  //}
+
+
+//  printf("rank %d is waiting\n",myrank);
+  MPI_Barrier(MPI_COMM_WORLD); //already there
+
   if(myrank==0){
     printf("Starting to read some blocks (doubles) in the geombc.dat.## files\n");
   }
@@ -320,7 +401,7 @@ int main(int argc, char *argv[]) {
       sprintf(gfname,"./%d-procs_case/geombc.dat.%d",N_parts,startpart+i);
       openfile_(gfname,"read",&igeom);
 
-      MPI_Barrier(MPI_COMM_WORLD);
+//      MPI_Barrier(MPI_COMM_WORLD);
 
       for ( j = 0; j < N_geombc_double; j++ )
 	{
@@ -339,29 +420,58 @@ int main(int argc, char *argv[]) {
 		       &expectD[j],
 		       "double",
 		       "binary" );
-	  if ( iarray[0]==-1 )
+	  if ( iarray[0]==-1 )  // The field requested in IO.O2N.input has not been found (should be a tpblocks)
 	      WriteLockD[j]=1;
 
-	  MPI_Barrier(MPI_COMM_WORLD);
+//          printf("%d %d %s %d\n",startpart+i,myrank,fieldNameD[j],iarray[0]);
+
+//	  MPI_Barrier(MPI_COMM_WORLD);
 
 	  // get the parameter list in data header ...
 	  // different fields have different ways to get this list ...
 	  for ( k = 0; k < expectD[j]; k++ )
 	    paraD[i][j][k] = iarray[k];
 
-	  if ( WriteLockD[j]==1)
+	  if ( WriteLockD[j]==1) // Put the value of the expected integers in the header to 0 when field not present
 	    for ( k = 0; k < expectD[j]; k++ )
 	      paraD[i][j][k] = 0;
 
+/*          int iproc;
+          for(iproc=0; iproc<N_procs; iproc++){
+            MPI_Barrier(MPI_COMM_WORLD);
+            if(iproc == myrank){
+              printf(" iproc: %d ", iproc);
+              printf("part: %d myrank: %d field: %s header: ",startpart+i,myrank,fieldNameD[j]);
+              for ( k = 0; k < expectD[j]; k++ )
+                printf(" %d ",iarray[k]);
+              printf("\n");
+            }
+            usleep(100);
+            MPI_Barrier(MPI_COMM_WORLD);
+          }*/
+
+
 	  if ( cscompare("block",headerTypeD[j]) )
 	    {
-	      if ( expectD[j]==1)
+/*	      if ( expectD[j]==1)
 		isize = paraD[i][j][0];
 	      else
 		isize = paraD[i][j][0] * paraD[i][j][1];
 
 	      if (cscompare("nbc values",fieldNameD[j]))
 		isize = paraD[i][j][0] * (numVariables[i]+1);
+*/
+
+//              int test;
+//              test = computenitems(i,j,myrank,fieldNameD[j],paraD,expectD[j],numVariables[i]);
+//              printf("irank: %d fieldname: %s ParaD: %d\n",myrank,fieldNameD[j], paraD[0][0][0], numVariables[i]);
+//              if(test != isize)
+//                printf("PROBLEM fieldname: %s part: %d isize: %d test: %d\n",fieldNameD[j],startpart+i,isize,test); 
+//              else 
+//                printf("fieldname: %s part: %d isize: %d test: %d\n",fieldNameD[j],startpart+i,isize,test); 
+
+              isize = computenitems(i,j,myrank,fieldNameD[j],paraD,expectD[j],numVariables[i]);
+              //printf("fieldname: %s part: %d isize: %d\n",fieldNameD[j],startpart+i,isize); 
 
 	      Dfield[i][j] = new double[isize];
 	      readdatablock_( &igeom,
@@ -372,7 +482,7 @@ int main(int argc, char *argv[]) {
 			      "binary" );
 	    }
 	}
-      MPI_Barrier(MPI_COMM_WORLD);
+//      MPI_Barrier(MPI_COMM_WORLD);
       closefile_(&igeom, "read");
     }
 
@@ -381,13 +491,34 @@ int main(int argc, char *argv[]) {
     printf("Starting to read some blocks (integers) in the geombc.dat.## files\n");
   }
 
+  // Count the number of interior and boundary tpblocks for 2 new headers named
+  // 'total number of different interior tpblocks' and
+  // 'total number of different boundary tpblocks'
+  int interiorCounter, boundaryCounter;
+  interiorCounter=0;  
+  boundaryCounter=0;  
+  for ( j = 0; j < N_geombc_integer; j++ )
+    {
+       if (cscompare("connectivity interior",fieldNameI[j]))
+	{
+                  //printf("part: %d, fieldNameI[j]: %s\n",GPID,fieldNameI[j]);
+		  interiorCounter++;
+        }
+        else if (cscompare("connectivity boundary",fieldNameI[j]))
+	{
+                  //printf("part: %d, fieldNameI[j]: %s\n",GPID,fieldNameI[j]);
+		  boundaryCounter++;
+        }
+    }
+
+  // Now, start to read the integer fields
   for ( i = 0; i < nppp; i++ )
     {
       sprintf(gfname,"./%d-procs_case/geombc.dat.%d",N_parts,startpart+i);
 
       openfile_(gfname,"read",&igeom);
 
-      MPI_Barrier(MPI_COMM_WORLD);
+//      MPI_Barrier(MPI_COMM_WORLD);
 
 //      printf("gfname is %s and nppp is %d myrank %d\n",gfname,i,myrank);
 
@@ -404,33 +535,70 @@ int main(int argc, char *argv[]) {
 
 	  WriteLockI[j]=0;
 	  iarray[0]=-1;
-	  readheader_( &igeom,
-		       fieldNameI[j],
-		       (void*)iarray,
-		       &expectI[j],
-		       "integer",
-		       "binary" );
-	  if ( iarray[0]==-1)
-	    WriteLockI[j]=1;
 
-	  MPI_Barrier(MPI_COMM_WORLD);
+          if ( cscompare("total number of different interior tpblocks",fieldNameI[j] ) )
+          { 
+             iarray[0] = interiorCounter; //New header that does not exist in the posix file 
+          }
+          else if ( cscompare("total number of different boundary tpblocks",fieldNameI[j] ) )
+          { 
+             iarray[0] = boundaryCounter; //New header that does not exist in the posix file 
+          }
+          else
+          {
+	     readheader_( &igeom,
+		          fieldNameI[j],
+		          (void*)iarray,
+		          &expectI[j],
+		          "integer",
+		          "binary" );
+	     if ( iarray[0]==-1)
+	       WriteLockI[j]=1; // The field was not found in the posix geombc file
+          }
+
+	  //MPI_Barrier(MPI_COMM_WORLD);
+
+/*          int iproc;
+          for(iproc=0; iproc<N_procs; iproc++){
+            MPI_Barrier(MPI_COMM_WORLD);
+            if(iproc == myrank){
+              printf(" iproc: %d ", iproc);
+              printf("part: %d myrank: %d field: %s header: ",startpart+i,myrank,fieldNameI[j]);
+              for ( k = 0; k < expectI[j]; k++ )
+                printf(" %d ",iarray[k]);
+              printf("\n");
+            }
+            usleep(100);
+            MPI_Barrier(MPI_COMM_WORLD);
+          }*/
 
 	  for ( k = 0; k < expectI[j]; k++ )
 	    paraI[i][j][k] = iarray[k];
 
-	  if ( WriteLockI[j]==1)
+	  if ( WriteLockI[j]==1) //The field is not present but SyncIO needs it to read collectively. Put 0.
 	    for ( k = 0; k < expectI[j]; k++ )
 	      paraI[i][j][k] = 0;
 
 	  if ( cscompare("block",headerTypeI[j]) )
 	    {
-	      if ( expectI[j]==1)
+/*	      if ( expectI[j]==1)
 		isize = paraI[i][j][0];
 	      else
 		isize = paraI[i][j][0] * paraI[i][j][1];
 
 	      if (cscompare("nbc codes",fieldNameI[j]))
 		isize = paraI[i][j][0] * 2;
+*/
+//              int test;
+//              test = computenitems(i,j,myrank,fieldNameI[j],paraI,expectI[j],numVariables[i]);
+//              printf("irank: %d fieldname: %s ParaI: %d\n",myrank,fieldNameI[j], parapI[0][0][0], numVariables[i]);
+//              if(test != isize)
+//                printf("PROBLEM fieldname: %s part: %d isize: %d test: %d\n",fieldNameI[j],startpart+i,isize,test); 
+//              else 
+//                printf("fieldname: %s part: %d isize: %d test: %d\n",fieldNameI[j],startpart+i,isize,test); 
+
+              isize = computenitems(i,j,myrank,fieldNameI[j],paraI,expectI[j],numVariables[i]);
+              //printf("fieldname: %s part: %d isize: %d\n",fieldNameI[j],startpart+i,isize); 
 
 	      Ifield[i][j] = new int[isize];
 	      readdatablock_( &igeom,
@@ -441,9 +609,11 @@ int main(int argc, char *argv[]) {
 			      "binary" );
 	    }
 	}
-      MPI_Barrier(MPI_COMM_WORLD);
+//      MPI_Barrier(MPI_COMM_WORLD);
       closefile_(&igeom, "read");
     }
+
+  MPI_Barrier(MPI_COMM_WORLD); //added by MR
 
   ///////////////////// Writing ///////////////////////////////
 
@@ -491,15 +661,15 @@ int main(int argc, char *argv[]) {
 		  bzero((void*)fieldNameD[j],128);
 		  sprintf(fieldNameD[j],"nbc values%d",valuesMark[i]);
 
-		  if ( valuesMark[i]>numBoundaryFields[i] )
-		   for ( k = 0; k < expectD[j]; k++ )
-		      paraD[i][j][k] = 0;
+//		  if ( valuesMark[i]>numBoundaryFields[i] )
+//		   for ( k = 0; k < expectD[j]; k++ )
+//		      paraD[i][j][k] = 0;
 		}
 
 	      sprintf(fieldtag,"%s@%d",fieldNameD[j],GPID);
 
 
-	      if ( expectD[j]==1 )
+/*	      if ( expectD[j]==1 )
 		isize = paraD[i][j][0];
 	      else
 		isize = paraD[i][j][0] * paraD[i][j][1];
@@ -509,12 +679,16 @@ int main(int argc, char *argv[]) {
 	      //Yeah, you have to open restart to get the size
 	      if ( fieldCompareMark==1 )
 		isize = paraD[i][j][0] * (numVariables[i]+1);
+*/
+	      if ( cscompare("header",headerTypeD[j]) )
+		isize = 0;
+              else // block
+                isize = computenitems(i,j,myrank,fieldNameD[j],paraD,expectD[j],numVariables[i]);
 
 	      for ( k = 0; k < expectD[j]; k++ )
 		iarray[k] = paraD[i][j][k];
-
-	      if ( cscompare("header",headerTypeD[j]) )
-		isize = 0;
+ 
+              //printf("write fieldname: %s part: %d isize: %d iarray: %d\n",fieldNameD[j],startpart+i,isize, iarray[0]); 
 
 	      writeheader_( &writeHandle,
 			    fieldtag,
@@ -549,6 +723,7 @@ int main(int argc, char *argv[]) {
     printf("Starting to write some blocks (integers) in the geombc.dat-## files\n");
   }
 
+  // Now the other fields listed in IO.O2N.input
   for ( j = 0; j < N_geombc_integer; j++ )
     {
       for (  i = 0; i < nppp; i++  )
@@ -564,9 +739,9 @@ int main(int argc, char *argv[]) {
 		  bzero((void*)fieldNameI[j],128);
 		  sprintf(fieldNameI[j],"connectivity interior%d",interiorMark[i]);
 
-		  if ( interiorMark[i]>numInteriorFields[i] )
-		    for ( k = 0; k < expectI[j]; k++ )
-		      paraI[i][j][k] = 0;
+//		  if ( interiorMark[i]>numInteriorFields[i] )
+//		    for ( k = 0; k < expectI[j]; k++ )
+//		      paraI[i][j][k] = 0;
 
 		}
 
@@ -576,9 +751,9 @@ int main(int argc, char *argv[]) {
 		  bzero((void*)fieldNameI[j],128);
 		  sprintf(fieldNameI[j],"connectivity boundary%d",boundaryMark[i]);
 
-		  if ( boundaryMark[i]>numBoundaryFields[i] )
-		    for ( k = 0; k < expectI[j]; k++ )
-		      paraI[i][j][k] = 0;
+//		  if ( boundaryMark[i]>numBoundaryFields[i] )
+//		    for ( k = 0; k < expectI[j]; k++ )
+//		      paraI[i][j][k] = 0;
 		}
 
 	      fieldCompareMark=0;
@@ -589,17 +764,17 @@ int main(int argc, char *argv[]) {
 		  bzero((void*)fieldNameI[j],128);
 		  sprintf(fieldNameI[j],"nbc codes%d",codesMark[i]);
 
-		  if ( codesMark[i]>numBoundaryFields[i] )
-		    for ( k = 0; k < expectI[j]; k++ )
-		      paraI[i][j][k] = 0;
+//		  if ( codesMark[i]>numBoundaryFields[i] )
+//		    for ( k = 0; k < expectI[j]; k++ )
+//		      paraI[i][j][k] = 0;
 		}
 
 	      sprintf(fieldtag,"%s@%d",fieldNameI[j],GPID);
 
-	      if ( expectI[j]==1)
-		isize = paraI[i][j][0];
-	      else
-		isize = paraI[i][j][0] * paraI[i][j][1];
+//	      if ( expectI[j]==1)
+//		isize = paraI[i][j][0];
+//	      else
+//		isize = paraI[i][j][0] * paraI[i][j][1];
 
 //MR CHANGE
 //              printf("rank,j,i,isize %d %d %d %d\n",myrank,j,i,isize);
@@ -607,14 +782,18 @@ int main(int argc, char *argv[]) {
 
 	      //specially designed for nbc codes fields
 	      //check the size in presolver codes
-	      if (fieldCompareMark==1)
-		isize = paraI[i][j][0] * 2;
-
-	      for ( k = 0; k < expectI[j]; k++ )
-		iarray[k] = paraI[i][j][k];
+//	      if (fieldCompareMark==1)
+//		isize = paraI[i][j][0] * 2;
 
 	      if ( cscompare("header",headerTypeI[j]) )
 		isize = 0;
+              else
+                isize = computenitems(i,j,myrank,fieldNameI[j],paraI,expectI[j],numVariables[i]);
+
+	      for ( k = 0; k < expectI[j]; k++ )
+		iarray[k] = paraI[i][j][k];
+   
+//              printf("write fieldname: %s part: %d isize: %d iarray: %d\n",fieldNameI[j],startpart+i,isize, iarray[0]); 
 
 	      writeheader_( &writeHandle,
 			    fieldtag,
@@ -1082,6 +1261,8 @@ int main(int argc, char *argv[]) {
     {
       printf("\nFinished transfer, please check data using:\n");
       printf(" grep -a ': <' filename \n\n");
+      printf("Note that the size of the fields is computed based on previous geombc files\n");
+      printf("Check the routine 'computenitems' if you have any reason to think it has changes for the fields you are interested in\n\n");
     }
 
   MPI_Finalize();
