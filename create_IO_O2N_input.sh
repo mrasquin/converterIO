@@ -1,6 +1,9 @@
 #!/bin/bash
 
-nargs=3  # Arguments of the script: time step, number parts and number of syncio files 
+nargs=3  # Arguments of the script: 
+         #  time step 
+         #  number parts 
+         #  number of syncio files wanted
 
 # Function die called when there is a problem 
 function die() {
@@ -104,9 +107,11 @@ echo "geombc, periodic masters array,                       integer,  block,    
 for ((i=1; i<=$boundary_tpblocks; i++))
 do
 	echo "geombc, connectivity boundary?,                       integer,  block,     8;" >> $file
+#	echo "geombc, nbc codes?,                                   integer,  block,     8;" >> $file
 done
 for ((i=1; i<=$boundary_tpblocks; i++))
 do
+#	echo "geombc, connectivity boundary?,                       integer,  block,     8;" >> $file
 	echo "geombc, nbc codes?,                                   integer,  block,     8;" >> $file
 done
 echo "restart, solution,                                    double,   block,     3;" >> $file
