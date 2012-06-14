@@ -366,7 +366,9 @@ cat $file_integer_field_restart >> $file
 rm $list_boundary_tpblocks
 rm $list_interior_tpblocks
 rm $file_grep_geombc
+rm $file_grep_restart
 rm $file_field_geombc
+rm $file_field_restart
 rm $file_double_field_geombc
 rm $file_integer_field_geombc
 rm $file_double_field_restart
