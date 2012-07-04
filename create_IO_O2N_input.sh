@@ -151,12 +151,12 @@ function check_field_geombc() {
 
 	# Trying to keep the order identical. 
 	# After 'number of nodes in the mesh' (already treated above) comes usually 'connectivity interior'
-	# NOTE that we also add a new field called 'total number of different interior tpblocks'. This field will be saved in the new syncIO geombc files.
+	# NOTE that we also add a new field called 'total number of interior tpblocks'. This field will be saved in the new syncIO geombc files.
         teststring="number of nodes in the mesh"
         if [ "${field_fun:0:${#teststring}}" == "$teststring" ]; then #we compare the first letters of the string
 	  
-	  echo "geombc, total number of different interior tpblocks, integer, header, 1;" >> $file_integer_field_geombc_fun
-	  echo "WARNING: a new field called 'total number of different interior tpblocks' will be added in the new geombc files"
+	  echo "geombc, total number of interior tpblocks, integer, header, 1;" >> $file_integer_field_geombc_fun
+	  echo "WARNING: a new field called 'total number of interior tpblocks' will be added in the new geombc files"
 
 	  while read line
 	  do 
@@ -167,12 +167,12 @@ function check_field_geombc() {
 
 	# Trying to keep the order identical. 
 	# After 'number of nodes in the mesh' (already treated above) comes usually 'connectivity boundary' and 'nbc code'
-	# NOTE that we also add a new field called 'total number of different boundary tpblocks'. This field will be saved in the new syncIO geombc files.
+	# NOTE that we also add a new field called 'total number of boundary tpblocks'. This field will be saved in the new syncIO geombc files.
         teststring="number of boundary tpblocks"
         if [ "${field_fun:0:${#teststring}}" == "$teststring" ]; then #we compare the first letters of the string
 
-	  echo "geombc, total number of different boundary tpblocks, integer, header, 1;" >> $file_integer_field_geombc_fun
-	  echo "WARNING: a new field called 'total number of different boundary tpblocks' will be added in the new geombc files"
+	  echo "geombc, total number of boundary tpblocks, integer, header, 1;" >> $file_integer_field_geombc_fun
+	  echo "WARNING: a new field called 'total number of boundary tpblocks' will be added in the new geombc files"
 
 	  while read line
 	  do 
