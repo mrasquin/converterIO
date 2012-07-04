@@ -510,11 +510,11 @@ int main(int argc, char *argv[]) {
 	  WriteLockI[j]=0;
 	  iarray[0]=-1;
 
-          if ( cscompare("total number of different interior tpblocks",fieldNameI[j] ) )
+          if ( cscompare("total number of interior tpblocks",fieldNameI[j] ) )
           { 
              iarray[0] = interiorCounter; //New header that does not exist in the posix file 
           }
-          else if ( cscompare("total number of different boundary tpblocks",fieldNameI[j] ) )
+          else if ( cscompare("total number of boundary tpblocks",fieldNameI[j] ) )
           { 
              iarray[0] = boundaryCounter; //New header that does not exist in the posix file 
           }
