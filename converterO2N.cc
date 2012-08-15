@@ -201,24 +201,24 @@ int main(int argc, char *argv[]) {
       int ione = 1;
       sprintf(gfname,"./%d-procs_case/restart.%d.%d",N_parts,N_steps,startpart+j);
 //			printf("before openfile(), myrank = %d \n", myrank);
-      openfile_(gfname,"read",&TempFileHandle);
+      openfile(gfname,"read",&TempFileHandle);
 //			printf("2 openfile(), myrank = %d \n", myrank);
 //			printf("1 readheader(), myrank = %d \n", myrank);
-      readheader_( &TempFileHandle,
+      readheader( &TempFileHandle,
 		   "number of variables",
 		   (void*)iarray,
 		   &ione,
 		   "integer",
 		   "binary" );
 //			printf("2 readheader(), myrank = %d \n", myrank);
-      closefile_(&TempFileHandle, "read");
+      closefile(&TempFileHandle, "read");
       numVariables[j] = iarray[0];
 
 //    It should be useless to read these information!!!! Fix this
 /*      bzero((void*)gfname,64);
       sprintf(gfname,"./%d-procs_case/geombc.dat.%d",N_parts,startpart+j);
-      openfile_(gfname,"read",&TempFileHandle);
-      readheader_( &TempFileHandle,
+      openfile(gfname,"read",&TempFileHandle);
+      readheader( &TempFileHandle,
 		   "number of interior tpblocks",
 		   (void*)iarray,
 		   &ione,
@@ -229,13 +229,13 @@ int main(int argc, char *argv[]) {
 */
 
 /*
-      readheader_( &TempFileHandle,
+      readheader( &TempFileHandle,
 		   "number of boundary tpblocks",
 		   (void*)iarray,
 		   &ione,
 		   "integer",
 		   "binary" );
-      closefile_(&TempFileHandle, "read");
+      closefile(&TempFileHandle, "read");
       numBoundaryFields[j] = iarray[0];
       //printf("file %d number of boundary[%d] is %d\n",startpart+j,j,numBoundaryFields[j]);
 */
@@ -374,7 +374,7 @@ int main(int argc, char *argv[]) {
   for ( i = 0; i < nppp; i++ )
     {
       sprintf(gfname,"./%d-procs_case/geombc.dat.%d",N_parts,startpart+i);
-      openfile_(gfname,"read",&igeom);
+      openfile(gfname,"read",&igeom);
 
 //      MPI_Barrier(MPI_COMM_WORLD);
 
@@ -389,7 +389,7 @@ int main(int argc, char *argv[]) {
 
 	  iarray[0]=-1;
 	  WriteLockD[j]=0;
-	  readheader_( &igeom,
+	  readheader( &igeom,
 		       fieldNameD[j],
 		       (void*)iarray,
 		       &expectD[j],
@@ -449,7 +449,7 @@ int main(int argc, char *argv[]) {
               //printf("fieldname: %s part: %d isize: %d\n",fieldNameD[j],startpart+i,isize); 
 
 	      Dfield[i][j] = new double[isize];
-	      readdatablock_( &igeom,
+	      readdatablock( &igeom,
 			      fieldNameD[j],
 			      (void*)Dfield[i][j],
 			      &isize,
@@ -458,7 +458,7 @@ int main(int argc, char *argv[]) {
 	    }
 	}
 //      MPI_Barrier(MPI_COMM_WORLD);
-      closefile_(&igeom, "read");
+      closefile(&igeom, "read");
     }
 
   MPI_Barrier(MPI_COMM_WORLD);
@@ -491,7 +491,7 @@ int main(int argc, char *argv[]) {
     {
       sprintf(gfname,"./%d-procs_case/geombc.dat.%d",N_parts,startpart+i);
 
-      openfile_(gfname,"read",&igeom);
+      openfile(gfname,"read",&igeom);
 
 //      MPI_Barrier(MPI_COMM_WORLD);
 
@@ -521,7 +521,7 @@ int main(int argc, char *argv[]) {
           }
           else
           {
-	     readheader_( &igeom,
+	     readheader( &igeom,
 		          fieldNameI[j],
 		          (void*)iarray,
 		          &expectI[j],
@@ -576,7 +576,7 @@ int main(int argc, char *argv[]) {
               //printf("fieldname: %s part: %d isize: %d\n",fieldNameI[j],startpart+i,isize); 
 
 	      Ifield[i][j] = new int[isize];
-	      readdatablock_( &igeom,
+	      readdatablock( &igeom,
 			      fieldNameI[j],
 			      (void*)Ifield[i][j],
 			      &isize,
@@ -585,7 +585,7 @@ int main(int argc, char *argv[]) {
 	    }
 	}
 //      MPI_Barrier(MPI_COMM_WORLD);
-      closefile_(&igeom, "read");
+      closefile(&igeom, "read");
     }
 
   MPI_Barrier(MPI_COMM_WORLD); //added by MR
@@ -609,9 +609,9 @@ int main(int argc, char *argv[]) {
     printf("Starting to write some blocks (doubles) in the geombc.dat-## files\n");
   }
 
-  initphmpiio_(&N_geombc, &nppf, &N_files,&writeHandle, "write");
-//  initphmpiio_(&N_geombc, &nppf, &N_files,&writeHandle);
-  openfile_(fname, "write", &writeHandle);
+  initphmpiio(&N_geombc, &nppf, &N_files,&writeHandle, "write");
+//  initphmpiio(&N_geombc, &nppf, &N_files,&writeHandle);
+  openfile(fname, "write", &writeHandle);
 
   for (  i = 0; i < nppp; i++  )
     {
@@ -665,14 +665,14 @@ int main(int argc, char *argv[]) {
  
               //printf("write fieldname: %s part: %d isize: %d iarray: %d\n",fieldNameD[j],startpart+i,isize, iarray[0]); 
 
-	      writeheader_( &writeHandle,
+	      writeheader( &writeHandle,
 			    fieldtag,
 			    (void*)iarray,
 			    &expectD[j],
 			    &isize,
 			    "double",
 			    "binary");
-	      writedatablock_( &writeHandle,
+	      writedatablock( &writeHandle,
 			       fieldtag,
 			       (void*)Dfield[i][j],
 			       &isize,
@@ -770,14 +770,14 @@ int main(int argc, char *argv[]) {
    
 //              printf("write fieldname: %s part: %d isize: %d iarray: %d\n",fieldNameI[j],startpart+i,isize, iarray[0]); 
 
-	      writeheader_( &writeHandle,
+	      writeheader( &writeHandle,
 			    fieldtag,
 			    (void*)iarray,
 			    &expectI[j],
 			    &isize,
 			    "integer",
 			    "binary");
-	      writedatablock_( &writeHandle,
+	      writedatablock( &writeHandle,
 			       fieldtag,
 			       (void*)Ifield[i][j],
 			       &isize,
@@ -802,8 +802,8 @@ int main(int argc, char *argv[]) {
     printf("Closing geombc-dat.##.## files\n");
   }
 
-  closefile_(&writeHandle, "write");
-  finalizephmpiio_(&writeHandle);
+  closefile(&writeHandle, "write");
+  finalizephmpiio(&writeHandle);
 
   if(myrank==0){
     printf("Free memory related to geombc-dat.##.## files\n");
@@ -966,7 +966,7 @@ int main(int argc, char *argv[]) {
       for ( j = 0; j < nppp; j++ )
 	{
 	  sprintf(gfname,"./%d-procs_case/restart.%d.%d",N_parts,N_steps,startpart+j);
-	  openfile_(gfname,"read",&irestart);
+	  openfile(gfname,"read",&irestart);
 
 	  for ( k = 0; k < 10; k++ )
 	    iarray[k]=0;
@@ -974,7 +974,7 @@ int main(int argc, char *argv[]) {
 	  paraD[i][j] = new int[expectD[i]];
 
 	  iarray[0]=-1;
-	  readheader_( &irestart,
+	  readheader( &irestart,
 		       fieldNameD[i],
 		       (void*)iarray,
 		       &expectD[i],
@@ -996,7 +996,7 @@ int main(int argc, char *argv[]) {
 		    isize = paraD[i][j][0] * paraD[i][j][1];
 
 		  Dfield[i][j] = new double[isize];
-		  readdatablock_( &irestart,
+		  readdatablock( &irestart,
 				  fieldNameD[i],
 				  (void*)Dfield[i][j],
 				  &isize,
@@ -1005,7 +1005,7 @@ int main(int argc, char *argv[]) {
 
 		}
 	    }
-	  closefile_(&irestart, "read");
+	  closefile(&irestart, "read");
 	}
     }
 
@@ -1020,7 +1020,7 @@ int main(int argc, char *argv[]) {
       for ( j = 0; j < nppp; j++ )
 	{
 	  sprintf(gfname,"./%d-procs_case/restart.%d.%d",N_parts,N_steps,startpart+j);
-	  openfile_(gfname,"read",&irestart);
+	  openfile(gfname,"read",&irestart);
 
 	  for ( k = 0; k < 10; k++ )
 	    iarray[k]=0;
@@ -1028,7 +1028,7 @@ int main(int argc, char *argv[]) {
 	  paraI[i][j] = new int[expectI[i]];
 
 	  iarray[0]=-1;
-	  readheader_( &irestart,
+	  readheader( &irestart,
 		       fieldNameI[i],
 		       (void*)iarray,
 		       &expectI[i],
@@ -1051,7 +1051,7 @@ int main(int argc, char *argv[]) {
 		    isize = paraI[i][j][0] * paraI[i][j][1];
 
 		  Ifield[i][j] = new int[isize];
-		  readdatablock_( &irestart,
+		  readdatablock( &irestart,
 				  fieldNameI[i],
 				  (void*)Ifield[i][j],
 				  &isize,
@@ -1059,7 +1059,7 @@ int main(int argc, char *argv[]) {
 				  "binary" );
 		}
 	    }
-	  closefile_(&irestart, "read");
+	  closefile(&irestart, "read");
 	}
     }
 
@@ -1074,9 +1074,9 @@ int main(int argc, char *argv[]) {
 //  sprintf(fname,"./%d-procs_case/restart-dat.%d.%d",N_parts,N_steps,((int)(myrank/(N_procs/N_files))+1));
   sprintf(fname,"./%d-procs_case-SyncIO-%d/restart-dat.%d.%d",N_parts,N_files,N_steps,((int)(myrank/(N_procs/N_files))+1));
 //MR CHANGE END
-  initphmpiio_(&N_restart, &nppf, &N_files,&writeHandle, "write");
-//  initphmpiio_(&N_restart, &nppf, &N_files,&writeHandle);
-  openfile_(fname, "write", &writeHandle);
+  initphmpiio(&N_restart, &nppf, &N_files,&writeHandle, "write");
+//  initphmpiio(&N_restart, &nppf, &N_files,&writeHandle);
+  openfile(fname, "write", &writeHandle);
 
   MPI_Barrier(MPI_COMM_WORLD);
   if(myrank==0){
@@ -1105,7 +1105,7 @@ int main(int argc, char *argv[]) {
 	      if ( cscompare("header",headerTypeD[i]) )
 		isize = 0;
 
-	      writeheader_( &writeHandle,
+	      writeheader( &writeHandle,
 			    fieldtag,
 			    (void*)iarray,
 			    &expectD[i],
@@ -1113,7 +1113,7 @@ int main(int argc, char *argv[]) {
 			    "double",
 			    "binary");
 
-	      writedatablock_( &writeHandle,
+	      writedatablock( &writeHandle,
 			       fieldtag,
 			       (void*)Dfield[i][j],
 			       &isize,
@@ -1153,7 +1153,7 @@ int main(int argc, char *argv[]) {
 	      if ( cscompare("header",headerTypeI[i]) )
 		isize = 0;
 
-	      writeheader_( &writeHandle,
+	      writeheader( &writeHandle,
 			    fieldtag,
 			    (void*)iarray,
 			    &expectI[i],
@@ -1161,7 +1161,7 @@ int main(int argc, char *argv[]) {
 			    "integer",
 			    "binary");
 
-	      writedatablock_( &writeHandle,
+	      writedatablock( &writeHandle,
 			       fieldtag,
 			       (void*)Ifield[i][j],
 			       &isize,
@@ -1181,8 +1181,8 @@ int main(int argc, char *argv[]) {
     printf("Closing restart-dat.##.## files\n");
   }
 
-  closefile_(&writeHandle, "write");
-  finalizephmpiio_(&writeHandle);
+  closefile(&writeHandle, "write");
+  finalizephmpiio(&writeHandle);
 
   MPI_Barrier(MPI_COMM_WORLD);
   if(myrank==0){

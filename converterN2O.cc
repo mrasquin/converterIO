@@ -167,8 +167,8 @@ int main(int argc, char *argv[]) {
   bzero((void*)fname,255);
   sprintf(fname,"./%d-procs_case/restart-dat.%d.%d",N_parts,N_steps,((int)(myrank/(N_procs/N_files))+1));
 
-  initphmpiio_(&N_restart, &nppf, &N_files,&readHandle1, "write");
-  openfile_(fname, "read", &readHandle1);
+  initphmpiio(&N_restart, &nppf, &N_files,&readHandle1, "write");
+  openfile(fname, "read", &readHandle1);
 
   for ( i = 0; i < N_restart_double; i++ )
     {
@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
 	  bzero((void*)fieldtag,255);
 	  sprintf(fieldtag,"%s@%d",fieldNameD[i],GPID);
 	  iarray[0]=-1;
-	  readheader_( &readHandle1,
+	  readheader( &readHandle1,
 		       fieldtag,
 		       (void*)iarray,
 		       &expectD[i],
@@ -219,7 +219,7 @@ int main(int argc, char *argv[]) {
 		    isize = paraD[i][j][0] * paraD[i][j][1];
 
 		  Dfield[i][j] = new double[isize];
-		  readdatablock_( &readHandle1,
+		  readdatablock( &readHandle1,
 				  fieldtag,
 				  (void*)Dfield[i][j],
 				  &isize,
@@ -261,7 +261,7 @@ int main(int argc, char *argv[]) {
 
 	  printf("Rank %d, fieldname is %s \n",myrank,fieldtag);
 
-	  readheader_( &readHandle1,
+	  readheader( &readHandle1,
 		       fieldtag,
 		       (void*)iarray,
 		       &expectI[i],
@@ -283,7 +283,7 @@ int main(int argc, char *argv[]) {
 		    isize = paraI[i][j][0] * paraI[i][j][1];
 
 		  Ifield[i][j] = new int[isize];
-		  readdatablock_( &readHandle1,
+		  readdatablock( &readHandle1,
 				  fieldtag,
 				  (void*)Ifield[i][j],
 				  &isize,
@@ -295,8 +295,8 @@ int main(int argc, char *argv[]) {
 
     }
 
-  closefile_(&readHandle1, "write");
-  finalizephmpiio_(&readHandle1);
+  closefile(&readHandle1, "write");
+  finalizephmpiio(&readHandle1);
 
   //////////////////////////writing////////////////////////////
 
@@ -313,29 +313,29 @@ int main(int argc, char *argv[]) {
 
   bzero((void*)fname,255);
   sprintf(fname,"./%d-procs_case-1PPP/restart.%d.%d",N_parts,N_steps,myrank+1);
-  openfile_(fname,"write", &irstou);
+  openfile(fname,"write", &irstou);
 
   /* writing the top ascii header for the restart file */
 
-  writestring_( &irstou,"# PHASTA Input File Version 2.0\n");
-  writestring_( &irstou,
+  writestring( &irstou,"# PHASTA Input File Version 2.0\n");
+  writestring( &irstou,
 		"# format \"keyphrase : sizeofnextblock usual headers\"\n");
 
   bzero( (void*)fname, 255 );
-  writestring_( &irstou, fname );
+  writestring( &irstou, fname );
 
-  writestring_( &irstou, fname );
-  writestring_( &irstou,"\n");
+  writestring( &irstou, fname );
+  writestring( &irstou,"\n");
 
 
   isize = 1;
   nitems = 1;
   iarray[ 0 ] = 1;
-  writeheader_( &irstou, "byteorder magic number ",
+  writeheader( &irstou, "byteorder magic number ",
 		(void*)iarray, &nitems, &isize, "integer", "binary" );
 
   nitems = 1;
-  writedatablock_( &irstou, "byteorder magic number ",
+  writedatablock( &irstou, "byteorder magic number ",
 		   (void*)mptr, &nitems, "integer", "binary" );
 
   for ( i = 0; i < N_restart_double; i++ )
@@ -348,7 +348,7 @@ int main(int argc, char *argv[]) {
 		{
 		  bzero( (void*)fname, 255 );
 		  sprintf(fname,"%s : < 0 > %d\n", fieldNameD[i],paraD[i][j][0]);
-		  writestring_( &irstou, fname );
+		  writestring( &irstou, fname );
 		}
 
 	      if ( cscompare("block",headerTypeD[i]) )
@@ -364,14 +364,14 @@ int main(int argc, char *argv[]) {
 		  if ( cscompare("header",headerTypeD[i]) )
 		    isize = 0;
 
-		  writeheader_( &irstou,
+		  writeheader( &irstou,
 				fieldNameD[i],
 				(void*)iarray,
 				&expectD[i],
 				&isize,
 				"double",
 				"binary");
-		  writedatablock_( &irstou,
+		  writedatablock( &irstou,
 				   fieldNameD[i],
 				   (void*)Dfield[i][j],
 				   &isize,
@@ -399,7 +399,7 @@ int main(int argc, char *argv[]) {
 		{
 		  bzero( (void*)fname, 255 );
 		  sprintf(fname,"%s : < 0 > %d\n", fieldNameI[i],paraI[i][j][0]);
-		  writestring_( &irstou, fname );
+		  writestring( &irstou, fname );
 		}
 
 	      if ( cscompare("block",headerTypeI[i]) )
@@ -412,14 +412,14 @@ int main(int argc, char *argv[]) {
 		  for ( k = 0; k < expectI[i]; k++ )
 		    iarray[k] = paraI[i][j][k];
 
-		  writeheader_( &irstou,
+		  writeheader( &irstou,
 				fieldNameI[i],
 				(void*)iarray,
 				&expectI[i],
 				&isize,
 				"integer",
 				"binary");
-		  writedatablock_( &irstou,
+		  writedatablock( &irstou,
 				   fieldNameI[i],
 				   (void*)Ifield[i][j],
 				   &isize,
@@ -435,7 +435,7 @@ int main(int argc, char *argv[]) {
     }
 
 
-  closefile_( &irstou, "write" );
+  closefile( &irstou, "write" );
   MPI_Barrier(MPI_COMM_WORLD);
 
 
