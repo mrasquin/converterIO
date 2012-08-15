@@ -4,7 +4,8 @@
 #include <string.h>
 #include "rdtsc.h"
 #include <stdlib.h>
-#include "mpi.h"
+#define OMPI_SKIP_MPICXX 1
+#include <mpi.h>
 #include <math.h>
 //MR CHANGE
 #include <sys/stat.h>
