@@ -485,6 +485,13 @@ int main(int argc, char *argv[]) {
 		  boundaryCounter++;
         }
     }
+  
+  MPI_Barrier(MPI_COMM_WORLD);
+  if(myrank==0){
+    printf("There are %d total connectivity interior and %d total connectivity boundary\n", interiorCounter, boundaryCounter);
+  }
+ 
+
 
   // Now, start to read the integer fields
   for ( i = 0; i < nppp; i++ )
