@@ -83,6 +83,10 @@ int main(int argc, char *argv[]) {
   temp = strtok ( pool, ":" );temp = strtok ( NULL, ":" );
   N_parts = atoi(temp);
 
+  if(myrank==0){
+    printf("numpe is %d and start is %d\n",N_parts,N_steps);
+  }
+
   fgets( target, 1024, pFile );
   token = strtok ( target, ";" );strcpy(pool,token);
   temp = strtok ( pool, ":" );temp = strtok ( NULL, ":" );
@@ -101,6 +105,15 @@ int main(int argc, char *argv[]) {
   int endpart = startpart + nppp - 1;
   char gfname[64], numTemp[128];
   int iarray[10], igeom, isize;
+
+
+  if (N_parts != N_procs) {
+      printf("Input error: number of parts should be equal to the number of procs!\n");
+      printf("Please modify the IO.O2N.input file!\n");
+      return 0;
+  }
+
+
 
   ///////////////////// reading ///////////////////////////////
 
@@ -167,7 +180,14 @@ int main(int argc, char *argv[]) {
   bzero((void*)fname,255);
   sprintf(fname,"./%d-procs_case/restart-dat.%d.%d",N_parts,N_steps,((int)(myrank/(N_procs/N_files))+1));
 
-  initphmpiio(&N_restart, &nppf, &N_files,&readHandle1, "write");
+  //if(myrank==0){
+  //  printf("Myrank is %d - Filename is %s \n",myrank,fname);
+  //}
+
+  int nfields;
+  queryphmpiio(fname, &nfields, &nppf);
+  //initphmpiio(&N_restart, &nppf, &N_files,&readHandle1, "write") ;//WRONG
+  initphmpiio(&nfields, &nppf, &N_files, &readHandle1, "read");
   openfile(fname, "read", &readHandle1);
 
   for ( i = 0; i < N_restart_double; i++ )
@@ -196,6 +216,9 @@ int main(int argc, char *argv[]) {
 	  GPID = startpart + j;
 	  bzero((void*)fieldtag,255);
 	  sprintf(fieldtag,"%s@%d",fieldNameD[i],GPID);
+
+          //printf("myrank %d - filedtag %s\n",myrank,fieldtag);
+
 	  iarray[0]=-1;
 	  readheader( &readHandle1,
 		       fieldtag,
@@ -259,7 +282,7 @@ int main(int argc, char *argv[]) {
 	  sprintf(fieldtag,"%s@%d",fieldNameI[i],GPID);
 	  iarray[0]=-1;
 
-	  printf("Rank %d, fieldname is %s \n",myrank,fieldtag);
+	  //printf("Rank %d, fieldname is %s \n",myrank,fieldtag);
 
 	  readheader( &readHandle1,
 		       fieldtag,
