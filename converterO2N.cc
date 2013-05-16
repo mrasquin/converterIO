@@ -211,7 +211,6 @@ int main(int argc, char *argv[]) {
 		   "binary" );
       closefile(&TempFileHandle, "read");
       numVariables[j] = iarray[0];
-
     }
 
     MPI_Barrier(MPI_COMM_WORLD); //added by MR
