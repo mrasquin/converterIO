@@ -40,9 +40,7 @@ computenitems(const int localpartid, const int fieldid, const int myrank, const 
 // - the name of the fields 
 // - the integers read from the header
 
-  int nItems;
-  //printf("irank: %d fieldname: %s ParaD: %d numVariables: %d\n",myrank,fieldName, para[0][0][0], numVariables);
-
+  int nItems = -1;
 
   if (cscompare("nbc values",fieldName))
     nItems = para[localpartid][fieldid][0] * (numVariables+1);
@@ -196,22 +194,22 @@ int main(int argc, char *argv[]) {
     printf("Starting to read some headers in the restart.##.## and geombc.dat.## files\n");
   }
 
-  // The number of variables does not vary from one part to another. Do not read this info from every part, as this is stupid.
-  // Ask instead rank 0 to read part 0 and broadcast the information to the other ranks. It saves a lot of time for very big meshes.
-  for (  j = 0; j < nppp; j++  )
-    {
-      int ione = 1;
-      sprintf(gfname,"./%d-procs_case/restart.%d.%d",N_parts,N_steps,startpart+j);
-      openfile(gfname,"read",&TempFileHandle);
-      readheader( &TempFileHandle,
-		   "number of variables",
+  // The number of variables does not vary from one part to another. Do not read this info from every part.
+  // The ideal would be to ask only rank 0 to read only part 0 and broadcast the information to the other ranks. It saves a lot of time for very big meshes.
+  // Right now, every rank will read the number of variables from the solution field of one part only, which is already better than reading this info from every part.
+    int ithree = 3;
+    j = 0;
+    sprintf(gfname,"./%d-procs_case/restart.%d.%d",N_parts,N_steps,startpart+j);
+    openfile(gfname,"read",&TempFileHandle);
+    readheader( &TempFileHandle,
+		   "solution",
 		   (void*)iarray,
-		   &ione,
-		   "integer",
+		   &ithree,
+		   "double",
 		   "binary" );
-      closefile(&TempFileHandle, "read");
-      numVariables[j] = iarray[0];
-    }
+    closefile(&TempFileHandle, "read");
+    for ( j = 0; j < nppp; j++ )
+      numVariables[j] = iarray[1]; //iarray[i] contains the number of variables from the header of the solution field
 
     MPI_Barrier(MPI_COMM_WORLD); //added by MR
 

@@ -211,15 +211,15 @@ function check_field_restart() {
           echo "restart, $field_fun, integer, block, 1;" >> $file_integer_field_restart_fun
         fi
 
-        teststring="number of modes"
-        if [ "${field_fun:0:${#teststring}}" == "$teststring" ]; then #we compare the first letters of the string
-          echo "restart, $field_fun, integer, header, 1;" >> $file_integer_field_restart_fun
-        fi
+        #teststring="number of modes" # Already in the geombc files and read by phasta from the geombc files
+        #if [ "${field_fun:0:${#teststring}}" == "$teststring" ]; then #we compare the first letters of the string
+        #  echo "restart, $field_fun, integer, header, 1;" >> $file_integer_field_restart_fun
+        #fi
 
-        teststring="number of variables"
-        if [ "${field_fun:0:${#teststring}}" == "$teststring" ]; then #we compare the first letters of the string
-          echo "restart, $field_fun, integer, header, 1;" >> $file_integer_field_restart_fun
-        fi
+        #teststring="number of variables" # Was required for the converter. Info now read from the solution field
+        #if [ "${field_fun:0:${#teststring}}" == "$teststring" ]; then #we compare the first letters of the string
+        #  echo "restart, $field_fun, integer, header, 1;" >> $file_integer_field_restart_fun
+        #fi
 
 }
 
