@@ -332,7 +332,7 @@ int main(int argc, char *argv[]) {
       for ( j = 0; j < N_geombc_double; j++ )
 	{
 
-//	  printf("read double ... %s\n",fieldNameD[j]);
+//	  printf("rank: %d - read double: %s\n",myrank,fieldNameD[j]);
 	  paraD[i][j] = new int[expectD[j]];
 
 	  for ( k = 0; k < 10; k++ )
@@ -349,7 +349,7 @@ int main(int argc, char *argv[]) {
 	  if ( iarray[0]==-1 )  // The field requested in IO.O2N.input has not been found (should be a tpblocks)
 	      WriteLockD[j]=1;
 
-//          printf("%d %d %s %d\n",startpart+i,myrank,fieldNameD[j],iarray[0]);
+//          printf("rank: %d - part: %d - field: %s - iarray: %d\n",myrank,startpart+i,fieldNameD[j],iarray[0]);
 
 //	  MPI_Barrier(MPI_COMM_WORLD);
 
