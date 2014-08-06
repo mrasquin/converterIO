@@ -150,9 +150,12 @@ function check_field_geombc() {
         fi
 
 	# Trying to keep the order identical. 
-	# After 'number of nodes in the mesh' (already treated above) comes usually 'connectivity interior'
+	# For phParAdapt, after 'number of nodes in the mesh' (already treated above) comes usually 'connectivity interior'.
+        # But there is no such field generated with NSpre so let us use "number of shapefunctions soved on processor" which is common to both.
+        # Moreover, in readnblk.f, the connectivity is read just after "number of shapefunctions soved on processor" so makes sense.
 	# NOTE that we also add a new field called 'total number of interior tpblocks'. This field will be saved in the new syncIO geombc files.
-        teststring="number of nodes in the mesh"
+        #teststring="number of nodes in the mesh"
+        teststring="number of shapefunctions soved on processor"
         if [ "${field_fun:0:${#teststring}}" == "$teststring" ]; then #we compare the first letters of the string
 	  
 	  echo "geombc, total number of interior tpblocks, integer, header, 1;" >> $file_integer_field_geombc_fun
