@@ -268,14 +268,14 @@ fi
 
 ### First, count the interior and boundary topology blocks
 list_interior_tpblocks=list_interior_tpblocks.dat
-grep -a ' : < ' $dir/geombc.dat.* | grep 'connectivity interior' | awk -F : '{print $1,$2}' | awk '{$1=""; print $0}' | sort | uniq -c  > $list_interior_tpblocks
+grep -aH ' : < ' $dir/geombc.dat.* | grep 'connectivity interior' | awk -F : '{print $1,$2}' | awk '{$1=""; print $0}' | sort | uniq -c  > $list_interior_tpblocks
 interior_tpblocks=`cat $list_interior_tpblocks | wc -l`
 echo "There are $interior_tpblocks different interior tp blocks in all the geombc files:"
 cat $list_interior_tpblocks
 echo ""
 
 list_boundary_tpblocks=list_boundary_tpblocks.dat
-grep -a ' : < ' $dir/geombc.dat.* | grep 'connectivity boundary' | awk -F : '{print $1,$2}' | awk '{$1=""; print $0}' | sort | uniq -c  > $list_boundary_tpblocks
+grep -aH ' : < ' $dir/geombc.dat.* | grep 'connectivity boundary' | awk -F : '{print $1,$2}' | awk '{$1=""; print $0}' | sort | uniq -c  > $list_boundary_tpblocks
 boundary_tpblocks=`cat $list_boundary_tpblocks | wc -l`
 echo "There are $boundary_tpblocks different boundary tp blocks in all the geombc files:"
 cat $list_boundary_tpblocks
