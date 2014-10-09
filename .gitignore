@@ -1,11 +1,5 @@
-.svn/
-lib/
-obj/
 *.[o]
 *~
 *.swp
-phastaIO.cc
-phastaIO.h
-rdtsc.h
 converterO2N
 converterN2O
