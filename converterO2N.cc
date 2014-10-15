@@ -12,6 +12,10 @@
 #include <sys/types.h>
 //MR CHANGE END
 
+enum {
+  DIR_FANOUT = 2048
+};
+
 inline int
 cscompare( const char teststring[],
 	   const char targetstring[] )
@@ -199,7 +203,36 @@ int main(int argc, char *argv[]) {
   // Right now, every rank will read the number of variables from the solution field of one part only, which is already better than reading this info from every part.
     int ithree = 3;
     j = 0;
-    sprintf(gfname,"./%d-procs_case/restart.%d.%d",N_parts,N_steps,startpart+j);
+
+    // Test if file exist in the procs_case directory
+    bzero((void*)gfname,64);
+    sprintf(gfname,"./%d-procs_case/restart.%d.%d", N_parts, N_steps, startpart+j);
+    int subdir = -1;
+    bool existsubdir = false;
+    FILE *pfiletest;
+    pfiletest = fopen(gfname, "r");
+    if (pfiletest == NULL ) {
+      // Test if file exist in the procs_case/subdir directory
+      subdir = (startpart+j-1) / DIR_FANOUT;
+      bzero((void*)gfname,64);
+      sprintf(gfname,"./%d-procs_case/%d/restart.%d.%d",N_parts, subdir, N_steps, startpart+j);
+      pfiletest = fopen(gfname, "r");
+      if (pfiletest == NULL ) {
+        printf("[%d] File %s does not exit - abort\n",myrank, gfname);
+        abort();
+      }
+      else{
+        existsubdir = true;
+        fclose(pfiletest);
+      }
+    }
+    else {
+      fclose(pfiletest);
+    }
+
+    // Debug
+    //printf("Rank: %d - subdir: %d - path: %s\n",myrank, subdir, gfname);
+
     openfile(gfname,"read",&TempFileHandle);
     readheader( &TempFileHandle,
 		   "solution",
@@ -324,7 +357,13 @@ int main(int argc, char *argv[]) {
 
   for ( i = 0; i < nppp; i++ )
     {
-      sprintf(gfname,"./%d-procs_case/geombc.dat.%d",N_parts,startpart+i);
+      if(existsubdir) { 
+        subdir = (startpart+i-1) / DIR_FANOUT;
+        sprintf(gfname,"./%d-procs_case/%d/geombc.dat.%d",N_parts, subdir, startpart+i);
+      }
+      else
+        sprintf(gfname,"./%d-procs_case/geombc.dat.%d",N_parts,startpart+i);
+
       openfile(gfname,"read",&igeom);
 
 //      MPI_Barrier(MPI_COMM_WORLD);
@@ -447,7 +486,12 @@ int main(int argc, char *argv[]) {
   // Now, start to read the integer fields
   for ( i = 0; i < nppp; i++ )
     {
-      sprintf(gfname,"./%d-procs_case/geombc.dat.%d",N_parts,startpart+i);
+      if(existsubdir) { 
+        subdir = (startpart+i-1) / DIR_FANOUT;
+        sprintf(gfname,"./%d-procs_case/%d/geombc.dat.%d",N_parts, subdir, startpart+i);
+      }
+      else
+        sprintf(gfname,"./%d-procs_case/geombc.dat.%d", N_parts, startpart+i);
 
       openfile(gfname,"read",&igeom);
 
@@ -923,7 +967,14 @@ int main(int argc, char *argv[]) {
     {
       for ( j = 0; j < nppp; j++ )
 	{
-	  sprintf(gfname,"./%d-procs_case/restart.%d.%d",N_parts,N_steps,startpart+j);
+
+          if(existsubdir) { 
+            subdir = (startpart+j-1) / DIR_FANOUT;
+	    sprintf(gfname,"./%d-procs_case/%d/restart.%d.%d",N_parts, subdir, N_steps,startpart+j);
+          }
+          else
+	    sprintf(gfname,"./%d-procs_case/restart.%d.%d",N_parts, N_steps, startpart+j);
+
 	  openfile(gfname,"read",&irestart);
 
 	  for ( k = 0; k < 10; k++ )
@@ -977,7 +1028,14 @@ int main(int argc, char *argv[]) {
     {
       for ( j = 0; j < nppp; j++ )
 	{
-	  sprintf(gfname,"./%d-procs_case/restart.%d.%d",N_parts,N_steps,startpart+j);
+
+          if(existsubdir) { 
+            subdir = (startpart+j-1) / DIR_FANOUT;
+	    sprintf(gfname,"./%d-procs_case/%d/restart.%d.%d",N_parts, subdir, N_steps, startpart+j);
+          }
+          else
+	    sprintf(gfname,"./%d-procs_case/restart.%d.%d",N_parts, N_steps, startpart+j);
+
 	  openfile(gfname,"read",&irestart);
 
 	  for ( k = 0; k < 10; k++ )
