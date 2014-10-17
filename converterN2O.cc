@@ -1,16 +1,13 @@
 #include <stdio.h>
 #include <iostream>
-#include "phastaIO.h"
 #include <string.h>
-#include "rdtsc.h"
 #include <stdlib.h>
-#define OMPI_SKIP_MPICXX 1
+//#define OMPI_SKIP_MPICXX 1 //Added in the CMakeList.txt file
 #include <mpi.h>
 #include <math.h>
-//MR CHANGE
 #include <sys/stat.h>
 #include <sys/types.h>
-//MR CHANGE END
+#include "phastaIO.h"
 
 inline int
 cscompare( const char teststring[],
